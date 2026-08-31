@@ -59,6 +59,14 @@ Apart from user and shortning of url's, we are implementing analytics functional
       - timeStamp<br>
       - createdAt
     </td>
+    <td width="50%">
+      <h4 align="center">UserLogin</h4>
+      - id<br>
+      - userId<br>
+      - email<br>
+      - password<br>
+      - createdAt
+    </td>
  </tr>
 </table>
 
@@ -138,6 +146,7 @@ Any request generated from browser be it for user creation, redirection, url cre
 
 The first operation in the short url generation flow is to create an user account. So user sign-up (i.e new user creation) will be the first flow in the application. we are handling user related operations in user service. Even though sigh-up and login functionalities feel very related, it might sound a wise decision to combine them in one service. But user service is the one which deals with everything related to user like user creation, modifications in user profile, deletion of user, etc. While auth service typically handle operations like validating credentials, generation of token, logout, password reset, etc. So user service will handle the new user creation requests.
 <br>Here as the structure of User entity is well defined i.e. name, email and password, if required we can add other fields as well but the structure is defined so a traditional SQL database like MySQL will work perfectly here. (This database will also work perfectly for mappigs and click events as there as well we have a well defined structure for each record).
+<br> Here in this API call we will populate data in two tables, one is users table i.e. the table which hold all information related to user like name, email, date of birth, occupation, etc. So to fetch user profile or any other operation related to user will be using this table. And another table is user_login table, this table only hold details related to authentication. Hence auth service will use this table to verify user credentials. We can use same table for both purposes but it is always a best choice to separate authentication related details of user from general user details.
 
 Next step after creation of user is to login to user account, for this the system need to authenticate the user with email id and password. Hence we have added a Auth service in system. This service will verify user credentials against the database and in case of valid credentials it will generate a JWT token and return it to front end. This token will be verified for all further requests from the user.
 

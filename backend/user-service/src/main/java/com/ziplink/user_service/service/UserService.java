@@ -29,7 +29,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity createNewUser(UserRequestDTO userRequestDTO, HttpServletRequest request) {
+    public UserEntity createNewUser(UserRequestDTO userRequestDTO) {
         logger.debug("Creating user : "+userRequestDTO.getUserName());
         // check if user already exist
         if(userRepository.existsByEmail(userRequestDTO.getEmailId())) {

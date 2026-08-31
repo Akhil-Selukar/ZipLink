@@ -25,9 +25,9 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createNewEmployee(@Valid @RequestBody UserRequestDTO userRequestDTO, HttpServletRequest request) {
+    public ResponseEntity<String> createNewUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
         logger.info("Received user creation request");
-        UserEntity savedUser = userService.createNewUser(userRequestDTO, request);
+        UserEntity savedUser = userService.createNewUser(userRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User "+savedUser.getUserName() +" created successfully");
     }
