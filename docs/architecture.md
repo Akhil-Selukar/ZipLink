@@ -3,7 +3,6 @@
     ZipLink (High Level Architecture)
   </h1>
 </div>
-<hr>
 
 <h3 align="center"> Requirements </h3>
 
@@ -59,9 +58,6 @@ Apart from user and shortning of url's, we are implementing analytics functional
       - shortUrl<br>
       - timeStamp<br>
       - createdAt
-    </td>
-    <td width="50%">
-      <h4 align="center"></h4>
     </td>
  </tr>
 </table>
