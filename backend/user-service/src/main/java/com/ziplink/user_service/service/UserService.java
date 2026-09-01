@@ -6,7 +6,6 @@ import com.ziplink.user_service.entity.UserEntity;
 import com.ziplink.user_service.exception.DuplicateUserException;
 import com.ziplink.user_service.repository.UserLoginRepository;
 import com.ziplink.user_service.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

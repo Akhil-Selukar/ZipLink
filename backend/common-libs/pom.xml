@@ -42,10 +42,7 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+			<!--	This is common-lib jar will be used as jar in other services so it should be normal jar and not spring boot executable		-->
 		</plugins>
 	</build>
 
