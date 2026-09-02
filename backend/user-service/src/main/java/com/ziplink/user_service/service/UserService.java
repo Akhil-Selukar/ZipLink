@@ -1,9 +1,11 @@
 package com.ziplink.user_service.service;
 
+import com.ziplink.common_libs.dto.UserAuthDetailsResponseDTO;
 import com.ziplink.user_service.dto.UserRequestDTO;
 import com.ziplink.user_service.entity.LoginDetailsEntity;
 import com.ziplink.user_service.entity.UserEntity;
 import com.ziplink.user_service.exception.DuplicateUserException;
+import com.ziplink.user_service.exception.UserNotFoundException;
 import com.ziplink.user_service.repository.UserLoginRepository;
 import com.ziplink.user_service.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -29,10 +31,10 @@ public class UserService {
 
     @Transactional
     public UserEntity createNewUser(UserRequestDTO userRequestDTO) {
-        logger.debug("Creating user : "+userRequestDTO.getUserName());
+        logger.debug("Creating user : {}",userRequestDTO.getUserName());
         // check if user already exist
         if(userRepository.existsByEmail(userRequestDTO.getEmailId())) {
-            logger.warn("User "+userRequestDTO.getUserName()+" already exist");
+            logger.warn("User {} already exist", userRequestDTO.getUserName());
             throw new DuplicateUserException("User with email "+userRequestDTO.getEmailId()+" already exists");
         }
 
@@ -56,4 +58,14 @@ public class UserService {
         return userRepository.existsByEmail(userEmail);
     }
 
+    public UserAuthDetailsResponseDTO getUserAuthDetailsByEmail(String email) {
+        LoginDetailsEntity user = loginRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email "+ email + " does not exist."));
+
+        UserAuthDetailsResponseDTO response = new UserAuthDetailsResponseDTO();
+        response.setEmail(user.getEmail());
+        response.setPassword(user.getPassword());
+
+        return response;
+    }
 }

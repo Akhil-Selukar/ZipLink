@@ -1,9 +1,8 @@
 package com.ziplink.auth_service.service;
 
+import com.ziplink.auth_service.channel.UserServiceChannel;
 import com.ziplink.auth_service.dto.AuthUserInfo;
-import com.ziplink.auth_service.entity.LoginDetailsEntity;
-import com.ziplink.auth_service.exception.UserNotFoundException;
-import com.ziplink.auth_service.repository.UserLoginRepository;
+import com.ziplink.common_libs.dto.UserAuthDetailsResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,19 +11,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthUserService implements UserDetailsService {
+
     @Autowired
-    private UserLoginRepository loginRepository;
+    private UserServiceChannel userServiceChannel;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return findUserByEmail(username);
-    }
+        UserAuthDetailsResponseDTO user = userServiceChannel.fetchUserDetails(username);    // userName is email
 
-    private UserDetails findUserByEmail(String userEmail){
-        // TODO :: instead of login repository form a userService channel here
-        LoginDetailsEntity user = loginRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("User with email "+ userEmail + " does not exist."));
-
-        return new AuthUserInfo(user);
+        return new AuthUserInfo(user.getEmail(), user.getPassword());
     }
 }
