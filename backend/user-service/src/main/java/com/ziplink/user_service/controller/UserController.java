@@ -37,4 +37,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
     }
+
+    @GetMapping("/userId/{email}")
+    public ResponseEntity<Long> findUserIdByEmail(@PathVariable String email){
+        logger.info("Received request to find user by email");
+        long userId = userService.getUserIdByEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userId);
+    }
 }

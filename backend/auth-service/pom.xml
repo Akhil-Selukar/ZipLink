@@ -69,7 +69,7 @@
 			<version>2.12.1</version>
 		</dependency>
 
-		<!--	need common redis config	-->
+		<!--	need common-libs config	-->
 		<dependency>
 			<groupId>com.ziplink</groupId>
 			<artifactId>common-libs</artifactId>

@@ -54,10 +54,6 @@ public class UserService {
         return savedUser;
     }
 
-    public boolean checkUserByEmail(String userEmail) {
-        return userRepository.existsByEmail(userEmail);
-    }
-
     public UserAuthDetailsResponseDTO getUserAuthDetailsByEmail(String email) {
         LoginDetailsEntity user = loginRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User with email "+ email + " does not exist."));
@@ -67,5 +63,10 @@ public class UserService {
         response.setPassword(user.getPassword());
 
         return response;
+    }
+
+    public long getUserIdByEmail(String email) {
+        UserEntity user = userRepository.findByEmail(email);
+        return user.getId();
     }
 }
