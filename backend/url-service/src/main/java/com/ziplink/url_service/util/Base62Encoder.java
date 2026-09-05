@@ -1,8 +1,5 @@
 package com.ziplink.url_service.util;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class Base62Encoder {
     private static final String BASE62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 

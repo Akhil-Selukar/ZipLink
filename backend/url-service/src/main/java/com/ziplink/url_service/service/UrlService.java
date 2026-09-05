@@ -5,6 +5,7 @@ import com.ziplink.url_service.dto.UrlRequestDTO;
 import com.ziplink.url_service.entity.UrlMappingEntity;
 import com.ziplink.url_service.repository.UrlRepository;
 import com.ziplink.url_service.util.Base62Encoder;
+import com.ziplink.url_service.util.SnowflakeIdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,19 +20,19 @@ public class UrlService {
 
     private final UrlRepository urlRepository;
     private final UserServiceChannel userServiceChannel;
+    private final SnowflakeIdGenerator idGenerator;
     private final Base62Encoder encoder;
 
-    public UrlService(UrlRepository urlRepository, UserServiceChannel userServiceChannel, Base62Encoder encoder) {
+    public UrlService(UrlRepository urlRepository, UserServiceChannel userServiceChannel, Base62Encoder encoder, SnowflakeIdGenerator idGenerator) {
         this.urlRepository = urlRepository;
         this.userServiceChannel = userServiceChannel;
         this.encoder = encoder;
+        this.idGenerator = idGenerator;
     }
 
     public String transformUrl(UrlRequestDTO requestDTO, String userEmail) {
         logger.debug("Processing url transformation");
-        // TODO :: gere generate id using snowflake id generator and encode it to base62
-        long uniqueId = (long) (Math.random()*1000);
-
+        long uniqueId = idGenerator.generate();
         String base62Encoded = encoder.encode(uniqueId);
 
         UrlMappingEntity urlMapping = new UrlMappingEntity();

@@ -1,5 +1,6 @@
 package com.ziplink.url_service.channel;
 
+import com.ziplink.url_service.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,10 +21,14 @@ public class UserServiceChannel {
 
     public Long fetchUserId(String email){
         logger.debug("Sending request to user service via UserServiceChannel.");
-        return userServiceClient.get()
-                .uri("/v1/user/userId/{email}", email)
-                .retrieve()
-                .bodyToMono(Long.class)
-                .block();
+        try {
+            return userServiceClient.get()
+                    .uri("/v1/user/userId/{email}", email)
+                    .retrieve()
+                    .bodyToMono(Long.class)
+                    .block();
+        } catch(Exception e){
+            throw new UserNotFoundException("User not found..!!");
+        }
     }
 }

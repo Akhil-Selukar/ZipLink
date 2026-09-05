@@ -11,4 +11,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(e.getMessage());
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleAllOtherExceptions(RuntimeException e){
+        return ResponseEntity.badRequest()
+                .body("Something went wrong, please contact system admin.");
+    }
 }
