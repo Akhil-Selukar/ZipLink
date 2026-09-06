@@ -1,6 +1,6 @@
 package com.ziplink.redirect_service.service;
 
-import com.ziplink.redirect_service.dto.ClickEvent;
+import com.ziplink.common_libs.dto.ClickEvent;
 import com.ziplink.redirect_service.entity.UrlMappingEntity;
 import com.ziplink.redirect_service.repository.RedirectUrlRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +45,7 @@ public class RedirectService {
 
             ClickEvent event = new ClickEvent(
                     shortUrl,
-                    mapping.getUser(),
+                    mapping.getUserId(),
                     mapping.getUrlName(),
                     request.getRemoteAddr(),
                     System.currentTimeMillis()

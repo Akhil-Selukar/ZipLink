@@ -1,5 +1,6 @@
 package com.ziplink.url_service.service;
 
+import com.ziplink.url_service.channel.AnalyticsServiceChannel;
 import com.ziplink.url_service.channel.UserServiceChannel;
 import com.ziplink.url_service.dto.UrlRequestDTO;
 import com.ziplink.url_service.entity.UrlMappingEntity;
@@ -20,12 +21,14 @@ public class UrlService {
 
     private final UrlRepository urlRepository;
     private final UserServiceChannel userServiceChannel;
+    private final AnalyticsServiceChannel analyticsServiceChannel;
     private final SnowflakeIdGenerator idGenerator;
     private final Base62Encoder encoder;
 
-    public UrlService(UrlRepository urlRepository, UserServiceChannel userServiceChannel, Base62Encoder encoder, SnowflakeIdGenerator idGenerator) {
+    public UrlService(UrlRepository urlRepository, UserServiceChannel userServiceChannel, AnalyticsServiceChannel analyticsServiceChannel, Base62Encoder encoder, SnowflakeIdGenerator idGenerator) {
         this.urlRepository = urlRepository;
         this.userServiceChannel = userServiceChannel;
+        this.analyticsServiceChannel = analyticsServiceChannel;
         this.encoder = encoder;
         this.idGenerator = idGenerator;
     }
@@ -61,6 +64,11 @@ public class UrlService {
 
     @Transactional
     public long deleteUrl(String shortUrl) {
-        return urlRepository.deleteByShortUrl(shortUrl);
+        // delete url mapping
+        long urlDeleted = urlRepository.deleteByShortUrl(shortUrl);
+        // delete click events for the url
+        analyticsServiceChannel.deleteAnalytics(shortUrl);
+
+        return urlDeleted;
     }
 }

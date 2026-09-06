@@ -1,6 +1,6 @@
 package com.ziplink.redirect_service.service;
 
-import com.ziplink.redirect_service.dto.ClickEvent;
+import com.ziplink.common_libs.dto.ClickEvent;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
-package com.ziplink.url_service.channel;
+package com.ziplink.analytics_service.channel;
 
-import com.ziplink.url_service.exception.UserNotFoundException;
+import com.ziplink.analytics_service.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,9 +11,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class UserServiceChannel {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceChannel.class);
 
+    @Qualifier("useServiceClient")
     private final WebClient userServiceClient;
 
-    public UserServiceChannel(@Qualifier("useServiceClient")WebClient userServiceClient) {
+    public UserServiceChannel(WebClient userServiceClient) {
         this.userServiceClient = userServiceClient;
     }
 

@@ -1,6 +1,6 @@
 package com.ziplink.redirect_service.service;
 
-import com.ziplink.redirect_service.dto.ClickEvent;
+import com.ziplink.common_libs.dto.ClickEvent;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.ziplink.redirect_service.dto;
+package com.ziplink.common_libs.dto;
 
 public class ClickEvent {
     private String shortUrl;
@@ -40,11 +40,11 @@ public class ClickEvent {
         this.timestamp = timestamp;
     }
 
-    public long getUser() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUser(long userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 

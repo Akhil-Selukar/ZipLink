@@ -11,10 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class UserServiceChannel {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceChannel.class);
 
-    @Qualifier("useServiceClient")
     private final WebClient userServiceClient;
 
-    public UserServiceChannel(WebClient userServiceClient) {
+    public UserServiceChannel(@Qualifier("useServiceClient")WebClient userServiceClient) {
         this.userServiceClient = userServiceClient;
     }
 

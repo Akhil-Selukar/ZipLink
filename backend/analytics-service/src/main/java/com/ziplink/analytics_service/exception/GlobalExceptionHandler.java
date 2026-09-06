@@ -1,4 +1,4 @@
-package com.ziplink.url_service.exception;
+package com.ziplink.analytics_service.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

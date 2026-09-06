@@ -16,4 +16,12 @@ public class WebClientConfig {
                 .baseUrl(userServiceUrl)
                 .build();
     }
+
+    @Bean
+    @ConditionalOnProperty(name = "baseUrl.analytics-service")
+    public WebClient analyticsServiceClient(@Value("${baseUrl.analytics-service}") String analyticsServiceUrl) {
+        return WebClient.builder()
+                .baseUrl(analyticsServiceUrl)
+                .build();
+    }
 }

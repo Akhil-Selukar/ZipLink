@@ -1,19 +1,19 @@
-package com.ziplink.redirect_service.entity;
-
+package com.ziplink.analytics_service.entity;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "url_mapping", uniqueConstraints = {@UniqueConstraint(columnNames = "short_url")})
-public class UrlMappingEntity {
+@Table(name = "click_events")
+public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "short_url")
     private String shortUrl;
-    @Column(name = "long_url")
-    private String longUrl;
+    @Column(name = "ip")
+    private String ip;
+    @Column(name = "time_stamp")
+    private long timestamp;
 
     @Column(name = "url_name")
     private String urlName;
@@ -21,14 +21,7 @@ public class UrlMappingEntity {
     @Column(name = "user_id", nullable = false)
     private long userId;
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public EventEntity(){};
 
     public String getShortUrl() {
         return shortUrl;
@@ -38,12 +31,20 @@ public class UrlMappingEntity {
         this.shortUrl = shortUrl;
     }
 
-    public String getLongUrl() {
-        return longUrl;
+    public String getIp() {
+        return ip;
     }
 
-    public void setLongUrl(String longUrl) {
-        this.longUrl = longUrl;
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public long getUserId() {

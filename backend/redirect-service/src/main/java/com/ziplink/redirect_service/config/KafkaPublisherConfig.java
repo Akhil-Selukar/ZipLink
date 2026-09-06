@@ -1,6 +1,6 @@
 package com.ziplink.redirect_service.config;
 
-import com.ziplink.redirect_service.dto.ClickEvent;
+import com.ziplink.common_libs.dto.ClickEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class KafkaConfig {
+public class KafkaPublisherConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
