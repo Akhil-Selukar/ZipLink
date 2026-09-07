@@ -1,0 +1,161 @@
+services:
+  # ==========================================
+  # Infrastructure - MySQL and Kafka
+  # ==========================================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+
+  # ==========================================
+  # Microservices
+  # ==========================================
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=user-service
+    container_name: user-service
+    ports:
+      - "${USER_SERVICE_PORT}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DB_URL=jdbc:mysql://mysql:3306/${MYSQL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=${MYSQL_ROOT_USER}
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SERVER_PORT=8080
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+    depends_on:
+      - mysql
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=auth-service
+    container_name: auth-service
+    ports:
+      - "${AUTH_SERVICE_PORT}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - AUTH_UNIQUE_KEY_ID=${AUTH_UNIQUE_KEY_ID}
+      - AUTH_VALIDITY_SEC=${AUTH_VALIDITY_SEC}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SERVER_PORT=8080
+      - USER_SERVICE_BASE_URI=http://user-service:8080
+      - AUTH_SECRET_PRIVATE_KEY=${AUTH_SECRET_PRIVATE_KEY}
+      - AUTH_SECRET_PUBLIC_KEY=${AUTH_SECRET_PUBLIC_KEY}
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+    depends_on:
+      - redis
+#      - user-service
+
+  url-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=url-service
+    container_name: url-service
+    ports:
+      - "${URL_SERVICE_PORT}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DB_URL=jdbc:mysql://mysql:3306/${MYSQL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=${MYSQL_ROOT_USER}
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SERVER_PORT=8080
+      - USER_SERVICE_BASE_URI=http://user-service:8080
+      - REDIRECTION_DOMAIN_NAME=http://localhost:8084
+      - MACHINE_ID=${URL_SERVICE_MACHINE_ID}
+      - ANALYTICS_SERVICE_BASE_URI=http://analytics-service:8080
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+    depends_on:
+      - mysql
+#      - user-service
+
+  redirect-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=redirect-service
+    container_name: redirect-service
+    ports:
+      - "${REDIRECT_SERVICE_PORT}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DB_URL=jdbc:mysql://mysql:3306/${MYSQL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=${MYSQL_ROOT_USER}
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SERVER_PORT=8080
+      - USER_SERVICE_BASE_URI=http://user-service:8080
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+    depends_on:
+      - mysql
+      - redis
+      - kafka
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=analytics-service
+    container_name: analytics-service
+    ports:
+      - "${ANALYTICS_SERVICE_PORT}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DB_URL=jdbc:mysql://mysql:3306/${MYSQL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
+      - DB_USERNAME=${MYSQL_ROOT_USER}
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SERVER_PORT=8080
+      - USER_SERVICE_BASE_URI=http://user-service:8080
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+    depends_on:
+      - mysql
+      - kafka
+
+volumes:
+  mysql_data: # to persists MySQL data locally in case of container restart

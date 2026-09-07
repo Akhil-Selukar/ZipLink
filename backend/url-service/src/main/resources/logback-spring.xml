@@ -1,5 +1,5 @@
 <configuration>
-    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_PATH" value="/tmp/logs"/>
     <springProperty
             scope="context"
             name="APP_NAME"
@@ -40,7 +40,7 @@
     <springProfile name="dev">
         <root>
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ASYNC_FILE"/>
+<!--            <appender-ref ref="ASYNC_FILE"/>-->
         </root>
     </springProfile>
 
