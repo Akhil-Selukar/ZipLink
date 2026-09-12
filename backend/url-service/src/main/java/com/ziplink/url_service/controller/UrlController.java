@@ -33,7 +33,7 @@ public class UrlController {
         logger.debug("Url transformation completed");
 
         Map<String, String> response = new HashMap<>();
-        response.put("shortUrl", baseUrl+"/"+shortUrl);
+        response.put("shortUrl", baseUrl+"/r/"+shortUrl);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);

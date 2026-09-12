@@ -30,7 +30,7 @@ public class KafkaPublisherConfig {
         // High throughput settings
         configProps.put(ProducerConfig.ACKS_CONFIG, "all"); // ensure durability
         configProps.put(ProducerConfig.RETRIES_CONFIG, 5);   // retry on failure
-        configProps.put(ProducerConfig.LINGER_MS_CONFIG, 20); // batch small events for 5ms
+        configProps.put(ProducerConfig.LINGER_MS_CONFIG, 20); // batch small events for 20ms
         configProps.put(ProducerConfig.BATCH_SIZE_CONFIG, 32*1024); // 32 KB batch
         configProps.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy"); // compress batch
         configProps.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 67108864); // buffer memory

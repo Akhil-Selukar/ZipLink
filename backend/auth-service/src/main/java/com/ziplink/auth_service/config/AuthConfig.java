@@ -60,7 +60,7 @@ public class AuthConfig {
     @Bean
     public SecurityFilterChain redirectionSecurityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+//                .cors(Customizer.withDefaults())      // handled at API gateway level
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/*").permitAll()          // for redirect we will permit all requests
                             .requestMatchers("/v1/user/create").permitAll()     // permit user creation (i.e. sign-up)

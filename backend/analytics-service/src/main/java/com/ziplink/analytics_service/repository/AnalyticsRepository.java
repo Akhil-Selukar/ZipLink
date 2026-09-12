@@ -14,7 +14,7 @@ public interface AnalyticsRepository extends CrudRepository<EventEntity, Long> {
         SELECT url_name AS urlName, short_url as shortUrl, COUNT(id) AS count
         FROM click_events
         WHERE user_id = :userId
-        GROUP BY url_name;
+        GROUP BY url_name, short_url;
         """, nativeQuery = true)
     List<ClickCountProjection> getClickCountsByUserId(@Param("userId") Long userId);
 

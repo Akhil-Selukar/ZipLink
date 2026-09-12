@@ -28,12 +28,23 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9192,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9192,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    healthcheck:
+      test: ["CMD-SHELL","/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9192 --list > /dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
   # ==========================================
   # Microservices
@@ -54,7 +65,6 @@ services:
       - DB_USERNAME=${MYSQL_ROOT_USER}
       - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - SERVER_PORT=8080
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
     depends_on:
       - mysql
 
@@ -78,7 +88,6 @@ services:
       - USER_SERVICE_BASE_URI=http://user-service:8080
       - AUTH_SECRET_PRIVATE_KEY=${AUTH_SECRET_PRIVATE_KEY}
       - AUTH_SECRET_PUBLIC_KEY=${AUTH_SECRET_PUBLIC_KEY}
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
     depends_on:
       - redis
 #      - user-service
@@ -103,7 +112,6 @@ services:
       - REDIRECTION_DOMAIN_NAME=http://localhost:8084
       - MACHINE_ID=${URL_SERVICE_MACHINE_ID}
       - ANALYTICS_SERVICE_BASE_URI=http://analytics-service:8080
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
     depends_on:
       - mysql
 #      - user-service
@@ -127,12 +135,16 @@ services:
       - USER_SERVICE_BASE_URI=http://user-service:8080
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9192
     depends_on:
-      - mysql
-      - redis
-      - kafka
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+#      kafka-init:
+#        condition: service_completed_successfully
 
   analytics-service:
     build:
@@ -145,17 +157,50 @@ services:
       - "${ANALYTICS_SERVICE_PORT}:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
-      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL=DEBUG
       - DB_URL=jdbc:mysql://mysql:3306/${MYSQL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
       - DB_USERNAME=${MYSQL_ROOT_USER}
       - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - SERVER_PORT=8080
       - USER_SERVICE_BASE_URI=http://user-service:8080
-      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9192
+    depends_on:
+      mysql:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+#      kafka-init:
+#        condition: service_completed_successfully
+
+  local-api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=local-api-gateway
+    container_name: local-api-gateway
+    ports:
+      - "${LOCAL_API_GATEWAY_PORT}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - AUTH_SERVICE_BASE_URL=http://auth-service:8080
+      - USER_SERVICE_BASE_URL=http://user-service:8080
+      - URL_SERVICE_BASE_URL=http://url-service:8080
+      - REDIRECT_SERVICE_BASE_URL=http://redirect-service:8080
+      - ANALYTICS_SERVICE_BASE_URL=http://analytics-service:8080
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
     depends_on:
-      - mysql
+      - redis
       - kafka
+      - mysql
+      - user-service
+      - url-service
+      - auth-service
+      - redirect-service
+      - analytics-service
 
 volumes:
   mysql_data: # to persists MySQL data locally in case of container restart

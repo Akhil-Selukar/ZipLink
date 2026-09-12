@@ -1,7 +1,7 @@
 # ==================================
 # Compile and Build all modules
 # ==================================
-FROM maven:3.9.16-eclipse-temurin-17-alpine AS builder
+FROM maven:3.9.16-eclipse-temurin-17 AS builder
 WORKDIR /build
 
 # Copy the parent POM and all child module POMs first to cache dependencies
@@ -12,6 +12,7 @@ COPY auth-service/pom.xml auth-service/
 COPY url-service/pom.xml url-service/
 COPY redirect-service/pom.xml redirect-service/
 COPY analytics-service/pom.xml analytics-service/
+COPY local-api-gateway/pom.xml local-api-gateway/
 
 # Download dependencies and cache them
 RUN mvn dependency:go-offline -B
@@ -23,6 +24,7 @@ COPY auth-service/ auth-service/
 COPY url-service/ url-service/
 COPY redirect-service/ redirect-service/
 COPY analytics-service/ analytics-service/
+COPY local-api-gateway/ local-api-gateway/
 
 ARG MODULE_NAME
 
@@ -36,10 +38,10 @@ RUN java -Djarmode=layertools -jar ${MODULE_NAME}/target/${MODULE_NAME}-*.jar ex
 # ==================================
 # Final runtime image
 # ==================================
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd --system spring && useradd --system --gid spring spring
 USER spring:spring
 
 # Copy the extracted layers from the builder stage

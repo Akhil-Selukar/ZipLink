@@ -1,0 +1,92 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+#    root: ${LOG_LEVEL}
+    root: INFO
+    org.springframework.security: DEBUG
+    org.springframework.security.web.server: TRACE
+    org.springframework.cloud.gateway: DEBUG
+
+spring:
+  application:
+    name: local-api-gateway
+  profiles:
+    active:
+      - ${SPRING_PROFILE}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  # To call auth service and fetch JWKS locally
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_SERVICE_BASE_URL}/v1/auth/.well-known/jwks.json
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - ${CORS_ALLOWED_ORIGIN}
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
+          routes:
+            # User service (public but rate limited)
+            - id: user-signup
+              uri: ${USER_SERVICE_BASE_URL}
+              predicates:
+                - Path=/v1/user/create
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    "redis-rate-limiter.replenishRate": 2
+                    "redis-rate-limiter.burstCapacity": 5
+                    "key-resolver": "#{@userKeyResolver}"
+
+            # Auth service (public)
+            - id: auth-service
+              uri: ${AUTH_SERVICE_BASE_URL}
+              predicates:
+                - Path=/v1/auth/**
+
+            # Url service (protected with rate limited)
+            - id: url-service
+              uri: ${URL_SERVICE_BASE_URL}
+              predicates:
+                - Path=/v1/url/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    "redis-rate-limiter.replenishRate": 5
+                    "redis-rate-limiter.burstCapacity": 10
+                    "key-resolver": "#{@userKeyResolver}"
+
+            # Analytics service (protected)
+            - id: analytics-service
+              uri: ${ANALYTICS_SERVICE_BASE_URL}
+              predicates:
+                - Path=/v1/analytics/**
+
+            # Redirection service (public)
+            - id: redirection-service
+              uri: ${REDIRECT_SERVICE_BASE_URL}
+              predicates:
+                - Path=/r/**
