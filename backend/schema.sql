@@ -1,6 +1,7 @@
 -- ==================================
 -- Database schema to load in MySQL
 -- ==================================
+create database if not exists ziplink_db;
 use ziplink_db;
 
 create table users(
@@ -40,3 +41,7 @@ CREATE TABLE click_events (
     PRIMARY KEY (id),
     foreign key (user_id) references users(id)
 );
+
+CREATE INDEX idx_short_url ON url_mapping(short_url);
+CREATE INDEX idx_click_events ON click_events(user_id);
+CREATE INDEX idx_user_login ON user_login(user_email);
